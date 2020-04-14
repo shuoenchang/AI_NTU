@@ -71,11 +71,44 @@ class ReflexAgent(Agent):
         newPos = successorGameState.getPacmanPosition()
         newFood = successorGameState.getFood()
         newGhostStates = successorGameState.getGhostStates()
+        newGhostPos = successorGameState.getGhostPositions()
+        ghostCount = len(newGhostPos)
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore() #default scoure
-        #please change the return score as the score you want
+        INF = 1e8
+        minFoodDistance = INF
+        minGhostDistance = INF
+        sumGhostDistance = float(0)
+        score = successorGameState.getScore()
+
+        for foodPos in newFood.asList():
+            distance = util.manhattanDistance(newPos, foodPos)
+            if minFoodDistance >= distance:
+                minFoodDistance = distance
+
+        for ghostPos in newGhostPos:
+            distance = util.manhattanDistance(newPos, ghostPos)
+            sumGhostDistance += distance
+            if minGhostDistance >= distance:
+                minGhostDistance = distance
+
+        if newPos in currentGameState.getCapsules():
+            score += INF
+        for capsules in successorGameState.getCapsules():
+            distance = util.manhattanDistance(newPos, capsules)
+            if distance < 5:
+                score += 20*(1.0/distance)
+        
+        minGhostDistance += 1e-9 # avoid divided by 0
+        if newScaredTimes[0]>1:
+            score += 20*(1.0/minGhostDistance)
+        else:
+            if minGhostDistance<3 or (ghostCount>2 and sumGhostDistance/ghostCount<10):
+                score -= INF*(1.0/minGhostDistance)
+        score += (5*1.0/minFoodDistance - 1.0/minGhostDistance)
+
+        return score
 
 def scoreEvaluationFunction(currentGameState):
     """
