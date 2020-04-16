@@ -223,8 +223,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     if score > maxScore:
                         maxScore = score
                         bestAction = action
-                    # if maxScore > beta: break
                     alpha = max(alpha, maxScore)
+                    # if maxScore > beta: break
                     if beta < alpha: break
                 return maxScore, bestAction
             else: # ghost => min
@@ -238,8 +238,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     if score < minScore:
                         minScore = score
                         bestAction = action
-                    # if minScore < alpha: break
                     beta = min(beta, minScore)
+                    # if minScore < alpha: break
                     if beta < alpha: break
                 return minScore, bestAction
         
@@ -258,7 +258,36 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        INF = 1e8
+        def expectimax(depth, gameState, agentIndex):
+            maxScore = -INF
+            minScore = INF
+
+            if depth==0 or gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(gameState), Directions.STOP
+
+            if agentIndex == 0: # pacman => max
+                maxScore = -INF
+                for action in gameState.getLegalActions(agentIndex): 
+                    nextState = gameState.generateSuccessor(agentIndex, action)
+                    score, _ = expectimax(depth, nextState, agentIndex+1)
+                    if score > maxScore:
+                        maxScore = score
+                        bestAction = action
+                return maxScore, bestAction
+            else: # ghost => min
+                sumScore = 0.0
+                for action in gameState.getLegalActions(agentIndex): 
+                    nextState = gameState.generateSuccessor(agentIndex, action)
+                    if agentIndex+1 < gameState.getNumAgents():
+                        score, _ = expectimax(depth, nextState, agentIndex+1)
+                    else:
+                        score, _ = expectimax(depth-1, nextState, 0)
+                    sumScore += score
+                return sumScore/len(gameState.getLegalActions(agentIndex)), _
+        
+        return expectimax(self.depth, gameState, 0)[1]
 
 def betterEvaluationFunction(currentGameState):
     """
