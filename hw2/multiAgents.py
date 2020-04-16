@@ -206,6 +206,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
+
         INF = 1e8
         def alphabeta(depth, gameState, agentIndex, alpha, beta):
             maxScore = -INF
@@ -222,9 +223,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     if score > maxScore:
                         maxScore = score
                         bestAction = action
-                    if maxScore > beta:  
-                        return maxScore, bestAction
+                    # if maxScore > beta: break
                     alpha = max(alpha, maxScore)
+                    if beta < alpha: break
                 return maxScore, bestAction
             else: # ghost => min
                 minScore = INF
@@ -237,9 +238,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     if score < minScore:
                         minScore = score
                         bestAction = action
-                    if minScore < alpha:
-                        return minScore, bestAction
+                    # if minScore < alpha: break
                     beta = min(beta, minScore)
+                    if beta < alpha: break
                 return minScore, bestAction
         
         return alphabeta(self.depth, gameState, 0, -INF, +INF)[1]
