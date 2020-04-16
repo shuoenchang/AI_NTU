@@ -164,8 +164,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
 
+        INF = 1e8
         def minimax(depth, gameState, agentIndex):
-            INF = 1e8
             maxScore = -INF
             minScore = INF
 
@@ -206,7 +206,43 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        INF = 1e8
+        def alphabeta(depth, gameState, agentIndex, alpha, beta):
+            maxScore = -INF
+            minScore = INF
+
+            if depth==0 or gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(gameState), Directions.STOP
+
+            if agentIndex == 0: # pacman => max
+                maxScore = -INF
+                for action in gameState.getLegalActions(agentIndex): 
+                    nextState = gameState.generateSuccessor(agentIndex, action)
+                    score, _ = alphabeta(depth, nextState, agentIndex+1, alpha, beta)
+                    if score > maxScore:
+                        maxScore = score
+                        bestAction = action
+                    if maxScore > beta:  
+                        return maxScore, bestAction
+                    alpha = max(alpha, maxScore)
+                return maxScore, bestAction
+            else: # ghost => min
+                minScore = INF
+                for action in gameState.getLegalActions(agentIndex): 
+                    nextState = gameState.generateSuccessor(agentIndex, action)
+                    if agentIndex+1 < gameState.getNumAgents():
+                        score, _ = alphabeta(depth, nextState, agentIndex+1, alpha, beta)
+                    else:
+                        score, _ = alphabeta(depth-1, nextState, 0, alpha, beta)
+                    if score < minScore:
+                        minScore = score
+                        bestAction = action
+                    if minScore < alpha:
+                        return minScore, bestAction
+                    beta = min(beta, minScore)
+                return minScore, bestAction
+        
+        return alphabeta(self.depth, gameState, 0, -INF, +INF)[1]
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
